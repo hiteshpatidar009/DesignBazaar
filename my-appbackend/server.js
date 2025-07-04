@@ -20,10 +20,22 @@ const AdminRoutes = require("./Admin/Admin.router");
 // app.use(cors());
 
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://designbazaar.vercel.app",
+];
+
 app.use(cors({
-  origin: "http://localhost:5173", // ✅ explicitly allow your frontend origin
-  credentials: true,               // ✅ allow cookies / sessions / headers
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
+
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended:true}))

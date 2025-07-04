@@ -57,7 +57,7 @@ const Footer = () => {
           <a href="mailto:hiteshpatidar009@gmail.com" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
             <FaEnvelope /> Email
           </a>
-          <a href="https://www.instagram.com/hiteshpatidar009/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
+          <a href="https://www.instagram.com/hitesh_patidar_1" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
             <FaInstagram /> Instagram
           </a>
           <a href="https://www.linkedin.com/in/hiteshpatidar009/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
