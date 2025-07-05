@@ -13,21 +13,39 @@ router.get("/top", async (req, res) => {
       { $limit: 10 },
     ]);
 
-    // Fetch vendor names
+    // Safely fetch vendor names using Vid as a number
     const vendorData = await Promise.all(
       topContributors.map(async (entry) => {
-        const vendor = await Vender.findOne({ Vid: entry._id });
-        return {
-          vendorId: entry._id,
-          vendorName: vendor?.VenderName || "Unknown",
-          approvedCount: entry.approvedCount,
-        };
+        try {
+          const vendor = await Vender.findOne({ Vid: Number(entry._id) });
+
+          if (!vendor) {
+            console.warn("⚠️ Vendor not found for ID:", entry._id);
+          }
+
+          return {
+            vendorId: entry._id,
+            vendorName: vendor?.VenderName || "Unknown",
+            approvedCount: entry.approvedCount,
+          };
+        } catch (innerErr) {
+          console.error("❌ Error fetching vendor:", innerErr);
+          return {
+            vendorId: entry._id,
+            vendorName: "Error",
+            approvedCount: entry.approvedCount,
+          };
+        }
       })
     );
 
-    res.json(vendorData);
+    res.status(200).json(vendorData);
   } catch (err) {
-    res.status(500).send("Error generating leaderboard");
+    console.error("🔥 Leaderboard Error:", err);
+    res.status(500).json({
+      message: "Error generating leaderboard",
+      error: err.message,
+    });
   }
 });
 
