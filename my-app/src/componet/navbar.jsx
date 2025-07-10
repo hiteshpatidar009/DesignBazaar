@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeLink, setActiveLink] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Update active link based on current URL
   useEffect(() => {
     const path = location.pathname;
 
@@ -16,6 +16,9 @@ const Navbar = () => {
     else if (path.includes("about")) setActiveLink("About Us");
     else if (path.includes("Mainpage") || path === "/") setActiveLink("Components");
     else setActiveLink('');
+
+    // Auto close on route change
+    setMenuOpen(false);
   }, [location]);
 
   const navItems = [
@@ -51,8 +54,8 @@ const Navbar = () => {
           </span>
         </motion.div>
 
-        {/* Navigation Buttons */}
-        <div className="flex space-x-4">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex space-x-4">
           {navItems.map((item) => (
             <motion.button
               key={item.id}
@@ -61,7 +64,6 @@ const Navbar = () => {
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
             >
-              {/* Active background */}
               {activeLink === item.id && (
                 <motion.div
                   layoutId="active-button"
@@ -70,14 +72,11 @@ const Navbar = () => {
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 />
               )}
-
-              {/* Hover glow effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-white/10 to-orange-500/10 opacity-0"
                 whileHover={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
               />
-
               <span className="relative z-10 flex items-center gap-2 px-1">
                 <span className="text-lg">{item.icon}</span>
                 <span className="whitespace-nowrap">{item.label}</span>
@@ -85,7 +84,43 @@ const Navbar = () => {
             </motion.button>
           ))}
         </div>
+
+        {/* Mobile Menu Toggle Button */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-white focus:outline-none"
+          >
+            {menuOpen ? "✖️" : "☰"}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu Items */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden mt-4 space-y-2 px-4"
+          >
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition ${
+                  activeLink === item.id ? "text-yellow-400 font-semibold" : "text-white"
+                }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 };

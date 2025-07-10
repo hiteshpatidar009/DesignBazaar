@@ -2,14 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FaLinkedin, FaInstagram, FaEnvelope } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6'; // import X (Twitter) icon
 
 const Footer = () => {
   const navigate = useNavigate();
 
   return (
     <footer className="bg-black text-white py-12 px-6 border-t border-white/10 relative z-10">
-      <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
-
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
         {/* Logo & Tagline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -17,7 +17,7 @@ const Footer = () => {
           transition={{ duration: 0.6 }}
         >
           <div
-            className="flex items-center space-x-3 cursor-pointer"
+            className="flex justify-center md:justify-start items-center space-x-3 cursor-pointer"
             onClick={() => navigate('/')}
           >
             <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-black font-bold shadow-md">
@@ -27,7 +27,7 @@ const Footer = () => {
               DesignBazaar
             </span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-gray-400 max-w-xs mx-auto md:mx-0">
             Empowering developers to build and share beautiful UI components.
           </p>
         </motion.div>
@@ -51,16 +51,19 @@ const Footer = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="flex flex-col space-y-3"
+          className="flex flex-col space-y-3 text-sm"
         >
           <h4 className="font-semibold text-white mb-2">Connect</h4>
-          <a href="mailto:hiteshpatidar009@gmail.com" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
+          <a href="mailto:hiteshpatidar009@gmail.com" className="flex justify-center md:justify-start items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
             <FaEnvelope /> Email
           </a>
-          <a href="https://www.instagram.com/hitesh_patidar_1" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
+          <a href="https://www.instagram.com/hitesh_patidar_1" target="_blank" rel="noopener noreferrer" className="flex justify-center md:justify-start items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
             <FaInstagram /> Instagram
           </a>
-          <a href="https://www.linkedin.com/in/hiteshpatidar009/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
+          <a href="https://x.com/hiteshpatidar_1" target="_blank" rel="noopener noreferrer" className="flex justify-center md:justify-start items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
+            <FaXTwitter /> Twitter (X)
+          </a>
+          <a href="https://www.linkedin.com/in/hiteshpatidar009/" target="_blank" rel="noopener noreferrer" className="flex justify-center md:justify-start items-center gap-2 text-gray-400 hover:text-yellow-400 transition">
             <FaLinkedin /> LinkedIn
           </a>
         </motion.div>

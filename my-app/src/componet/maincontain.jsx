@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "../api/axiosInstance";
 
@@ -9,31 +8,53 @@ const ComponentShowcase = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTabs, setActiveTabs] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAllComponents();
-  }, []);
+  // 👇 Loading screen component
+  const LoadingScreen = () => (
+    <div className="flex justify-center items-center h-screen w-full bg-zinc-950 text-white">
+      <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-gray-300 to-orange-400 animate-pulse">
+        Loading...
+      </span>
+    </div>
+  );
 
+  // 👇 Fetch all components
   const fetchAllComponents = async () => {
     try {
+      setLoading(true);
       const res = await axiosInstance.get("/uicomponent/allcomponents");
       setComponents(res.data);
+
       const uniqueCats = [...new Set(res.data.map((item) => item.category))];
       setCategories(uniqueCats);
+
+      setLoading(false);
     } catch (err) {
+      console.error(err);
+      setLoading(false);
       alert("Component Fetch Error: " + err.message);
     }
   };
 
+  // 👇 Fetch on first load
+  useEffect(() => {
+    fetchAllComponents();
+  }, []);
+
+  // 👇 Filter by category
   const fetchByCategory = async (cat) => {
     setActiveCategory(cat);
     if (cat === "all") {
       fetchAllComponents();
     } else {
       try {
+        setLoading(true);
         const res = await axiosInstance.get(`/uicomponent/category/${cat}`);
         setComponents(res.data);
+        setLoading(false);
       } catch (err) {
+        setLoading(false);
         alert("Category Filter Error: " + err.message);
       }
     }
@@ -50,10 +71,13 @@ const ComponentShowcase = () => {
     });
   };
 
+  // ✅ Return loading screen while loading
+  if (loading) return <LoadingScreen />;
+
   return (
     <div className="flex min-h-screen bg-zinc-950 text-white">
-      {/* Sidebar */}
-      <aside className="w-64 bg-zinc-900 border-r border-white/10 overflow-y-auto p-4">
+      {/* ✅ Sidebar */}
+      <aside className="hidden md:block w-64 bg-zinc-900 border-r border-white/10 overflow-y-auto p-4">
         <h2 className="text-xl font-bold mb-4">📚 Components</h2>
         <ul className="space-y-2">
           <motion.li
@@ -86,18 +110,37 @@ const ComponentShowcase = () => {
         </ul>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-8">
+      {/* ✅ Main Content */}
+      <main className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+        {/* Mobile Dropdown */}
+        <div className="block md:hidden mb-6">
+          <select
+            value={activeCategory}
+            onChange={(e) => fetchByCategory(e.target.value)}
+            className="w-full max-w-xs mx-auto bg-zinc-800 text-white px-4 py-2 rounded-lg border border-white/20"
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-400 via-gray-200 to-orange-400 bg-clip-text text-transparent"
+          className="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-400 via-gray-200 to-orange-400 bg-clip-text text-transparent text-center"
         >
-          {activeCategory === "all" ? "All Components" : `${activeCategory} Components`}
+          {activeCategory === "all"
+            ? "All Components"
+            : `${activeCategory} Components`}
         </motion.h1>
 
-        {/* Component Cards */}
+        {/* Cards */}
         <div className="flex flex-col items-center space-y-10">
           {components.map((comp) => {
             const currentTab = activeTabs[comp._id] || "preview";
@@ -113,13 +156,15 @@ const ComponentShowcase = () => {
                 <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-yellow-400 via-gray-200 to-orange-400 bg-clip-text text-transparent">
                   {comp.name} Component
                 </h2>
-                <p className="text-sm text-orange-300 mb-2">Category: {comp.category}</p>
+                <p className="text-sm text-orange-300 mb-2">
+                  Category: {comp.category}
+                </p>
                 <p className="text-sm text-gray-400 italic mb-4">
                   📎 {comp.description || "No description provided."}
                 </p>
 
-                <div className="flex space-x-4 mb-4">
-                  {['preview', 'html', 'jsx'].map((tab) => (
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {["preview", "html", "jsx"].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => toggleTab(comp._id, tab)}
@@ -139,7 +184,12 @@ const ComponentShowcase = () => {
                 <div className="bg-black/40 border border-white/10 rounded-lg p-6 min-h-[120px] relative">
                   <AnimatePresence mode="wait">
                     {currentTab === "preview" && (
-                      <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <motion.div
+                        key="preview"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
                         {comp.Imagename ? (
                           <img
                             src={comp.Imagename}
@@ -153,12 +203,32 @@ const ComponentShowcase = () => {
                     )}
 
                     {(currentTab === "html" || currentTab === "jsx") && (
-                      <motion.div key={currentTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <pre className={`${currentTab === "html" ? "text-yellow-300" : "text-green-400"} whitespace-pre-wrap text-sm`}>
-                          {currentTab === "html" ? comp.htmlCode : comp.jsxCode}
+                      <motion.div
+                        key={currentTab}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <pre
+                          className={`${
+                            currentTab === "html"
+                              ? "text-yellow-300"
+                              : "text-green-400"
+                          } whitespace-pre-wrap text-sm`}
+                        >
+                          {currentTab === "html"
+                            ? comp.htmlCode
+                            : comp.jsxCode}
                         </pre>
                         <button
-                          onClick={() => handleCopy(currentTab === "html" ? comp.htmlCode : comp.jsxCode, comp._id)}
+                          onClick={() =>
+                            handleCopy(
+                              currentTab === "html"
+                                ? comp.htmlCode
+                                : comp.jsxCode,
+                              comp._id
+                            )
+                          }
                           className="absolute top-4 right-4 px-3 py-1 text-xs rounded-md bg-zinc-700 hover:bg-zinc-600"
                         >
                           {copiedId === comp._id ? "✅ Copied" : "📋 Copy"}
