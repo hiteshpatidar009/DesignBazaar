@@ -24,6 +24,7 @@ function AdminLogin() {
       // ✅ Store JWT token
       sessionStorage.setItem("adminToken", res.data.token);
       sessionStorage.setItem("adminId", res.data.adminId);
+      
 
       navigate("/admin/dashboard");
     } catch (err) {

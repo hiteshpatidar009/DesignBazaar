@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import CategoryPage from "./Category";
 import UIComponentCRUD from "./UIComponentCURDAdmin";
 import VendorMgt from "./VenderMgt";
@@ -13,6 +14,12 @@ const tabs = [
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken"); // or sessionStorage.clear()
+    navigate("/admin/login"); // redirect to login
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -45,26 +52,38 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-black text-white">
       <div className="flex flex-col md:flex-row">
         {/* Sidebar */}
-        <aside className="w-full md:w-64 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg border-r border-gray-700">
-          <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400 tracking-wider">
-            ⚙️ Admin Panel
-          </h2>
-          <ul className="space-y-3">
-            {tabs.map((tab) => (
-              <motion.li
-                key={tab.id}
-                whileHover={{ scale: 1.05 }}
-                onClick={() => setActiveTab(tab.id)}
-                className={`cursor-pointer rounded-lg px-4 py-3 transition-all duration-300 font-medium ${
-                  activeTab === tab.id
-                    ? "bg-cyan-500 text-black shadow-md"
-                    : "hover:bg-gray-700 text-gray-300"
-                }`}
-              >
-                {tab.label}
-              </motion.li>
-            ))}
-          </ul>
+        <aside className="w-full md:w-64 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg border-r border-gray-700 flex flex-col justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400 tracking-wider">
+              ⚙️ Admin Panel
+            </h2>
+            <ul className="space-y-3">
+              {tabs.map((tab) => (
+                <motion.li
+                  key={tab.id}
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`cursor-pointer rounded-lg px-4 py-3 transition-all duration-300 font-medium ${
+                    activeTab === tab.id
+                      ? "bg-cyan-500 text-black shadow-md"
+                      : "hover:bg-gray-700 text-gray-300"
+                  }`}
+                >
+                  {tab.label}
+                </motion.li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Logout Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogout}
+            className="mt-10 w-full bg-red-500 text-white font-semibold py-2 rounded-lg shadow hover:bg-red-600 transition"
+          >
+            🔓 Logout
+          </motion.button>
         </aside>
 
         {/* Main Content */}
