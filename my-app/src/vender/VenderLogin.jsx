@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
-import axiosInstance from "../api/axiosInstance";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function VenderLogin() {
   const [uid, setUId] = useState("");
@@ -25,10 +26,10 @@ function VenderLogin() {
   const handleLoginButton = () => {
     const obj = { vuid: uid, vupass: upass };
 
-     axiosInstance.post("/vender/login", obj).then((res) => {
+    axiosInstance.post("/vender/login", obj).then((res) => {
       if (res.data.VUserId !== undefined) {
         if (res.data.Status === "Inactive") {
-          alert("User Not Active. Please wait for admin activation.");
+          toast.warning("User not active. Please wait for admin approval.");
           return;
         }
 
@@ -37,19 +38,21 @@ function VenderLogin() {
           Cookies.set("vauth", JSON.stringify(userData), { expires: 7 });
         }
 
-        sessionStorage.setItem("vsessionauth", JSON.stringify({ vuserfullname: res.data.VenderName }));
-
         const userInfo = {
           vfname: res.data.VenderName,
           vpicname: res.data.VPicName,
           vid: res.data.Vid,
         };
 
-        alert("Login Successful " + userInfo.vfname);
+        sessionStorage.setItem("vsessionauth", JSON.stringify(userInfo)); // ✅ corrected session key
+
+        toast.success(`Welcome, ${userInfo.vfname}!`);
         navigate("/vender/dashboard", { state: userInfo });
       } else {
-        alert("Invalid Id/Password");
+        toast.error("Invalid ID or Password");
       }
+    }).catch(() => {
+      toast.error("Server error. Please try again later.");
     });
   };
 
@@ -65,7 +68,7 @@ function VenderLogin() {
       Status: "Inactive",
     };
 
-     axiosInstance.post("/vender/google-register", googleUser)
+    axiosInstance.post("/vender/google-register", googleUser)
       .then((res) => {
         const userInfo = {
           vfname: res.data.VenderName,
@@ -73,16 +76,16 @@ function VenderLogin() {
           vid: res.data.Vid,
         };
 
-        if (res.data.Status === "active") {
-          alert("User created but awaiting admin approval.");
+        if (res.data.Status === "Inactive") {
+          toast.info("Account created. Awaiting admin approval.");
         } else {
-          alert("Google Login Successful: " + userInfo.vfname);
+          sessionStorage.setItem("vsessionauth", JSON.stringify(userInfo));
+          toast.success(`Google Login Successful: ${userInfo.vfname}`);
           navigate("/vender/dashboard", { state: userInfo });
         }
       })
-      .catch((err) => {
-        console.error("Google login error", err);
-        alert("Login failed. Try again.");
+      .catch(() => {
+        toast.error("Google login failed. Try again.");
       });
   };
 
@@ -93,6 +96,7 @@ function VenderLogin() {
       transition={{ duration: 0.5 }}
       className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black via-gray-900 to-zinc-800"
     >
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="bg-zinc-900 text-white p-8 rounded-xl shadow-xl w-full max-w-md">
         <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-green-400 to-blue-500 text-transparent bg-clip-text">
           🤖👨‍💻 Contributor Login 👨‍💻🤖
@@ -120,25 +124,36 @@ function VenderLogin() {
 
         <div className="form-control mb-4">
           <label className="cursor-pointer label">
-            <input type="checkbox" className="checkbox checkbox-primary" onClick={() => setIsChecked(!ischecked)} />
+            <input
+              type="checkbox"
+              className="checkbox checkbox-primary"
+              onClick={() => setIsChecked(!ischecked)}
+            />
             <span className="label-text ml-2">Remember Me</span>
           </label>
         </div>
 
-        <button onClick={handleLoginButton} className="btn btn-success w-full mb-4">Login</button>
+        <button onClick={handleLoginButton} className="btn btn-success w-full mb-4">
+          Login
+        </button>
 
         <div className="text-center text-gray-400">OR</div>
 
         <div className="my-4 flex justify-center">
           <GoogleLogin
             onSuccess={handleGoogleLogin}
-            onError={() => alert("Google Login Failed")}
+            onError={() => toast.error("Google Login Failed")}
           />
         </div>
 
         <div className="text-center">
           <p className="mb-2">Don't have an account?</p>
-          <button onClick={() => navigate("/register")} className="btn btn-outline w-full">Register</button>
+          <button
+            onClick={() => navigate("/register")}
+            className="btn btn-outline w-full"
+          >
+            Register
+          </button>
         </div>
       </div>
     </motion.div>
